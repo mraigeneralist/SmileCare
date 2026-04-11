@@ -1,3 +1,9 @@
+type Contact = {
+  id: string;
+  name: string;
+  phone: string;
+};
+
 "use client";
 
 import React from "react";
@@ -5,7 +11,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
-  const [contacts, setContacts] = React.useState<any[]>([]);
+  const [contacts, setContacts] = React.useState<Contact[]>([]);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -23,13 +29,12 @@ export default function AdminPage() {
   }
 
   async function fetchContacts() {
-    const { data } = await supabase
-      .from("contact")
-      .select("*")
-      .order("id", { ascending: false });
+    const { data, error } = await supabase
+        .from("contact")
+        .select("*");
 
     if (data) {
-      setContacts(data);
+        setContacts(data as Contact[]);
     }
   }
 
