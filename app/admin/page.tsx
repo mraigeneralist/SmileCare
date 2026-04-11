@@ -1,14 +1,14 @@
-type Contact = {
-  id: string;
-  name: string;
-  phone: string;
-};
-
 "use client";
 
 import React from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+
+type Contact = {
+  id: string;
+  name: string;
+  phone: string;
+};
 
 export default function AdminPage() {
   const [contacts, setContacts] = React.useState<Contact[]>([]);
