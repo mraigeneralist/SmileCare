@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
-  const [contacts, setContacts] = React.useState([]);
+  const [contacts, setContacts] = React.useState<any[]>([]);
   const router = useRouter();
 
   React.useEffect(() => {
