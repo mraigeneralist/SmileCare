@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { supabase } from "@/lib/supabase";
@@ -39,6 +39,23 @@ export default function BookPage() {
     time: string;
     patientName: string;
   } | null>(null);
+
+  // Step transition animation
+  const [animating, setAnimating] = useState(false);
+  const pendingStep = useRef<number | null>(null);
+
+  const goToStep = useCallback((nextStep: number) => {
+    if (animating) return;
+    setAnimating(true);
+    pendingStep.current = nextStep;
+    setTimeout(() => {
+      setStep(nextStep);
+      pendingStep.current = null;
+      requestAnimationFrame(() => {
+        setAnimating(false);
+      });
+    }, 200);
+  }, [animating]);
 
   // Load services and availability on mount
   useEffect(() => {
@@ -79,19 +96,21 @@ export default function BookPage() {
   }, []);
 
   const handleServiceSelect = (service: Service) => {
-    setSelectedService(service);
-    setStep(2);
+    if (selectedService?.id === service.id) {
+      setSelectedService(null);
+    } else {
+      setSelectedService(service);
+    }
   };
 
-  const handleDateSelect = (date: Date) => {
+  const handleDateSelect = (date: Date | null) => {
     setSelectedDate(date);
-    if (selectedService) fetchSlots(date, selectedService.id);
-    setStep(3);
+    setSelectedTime(null);
+    if (date && selectedService) fetchSlots(date, selectedService.id);
   };
 
   const handleTimeSelect = (time: string) => {
-    setSelectedTime(time);
-    setStep(4);
+    setSelectedTime(selectedTime === time ? null : time);
   };
 
   const handleBookingSubmit = async () => {
@@ -121,7 +140,7 @@ export default function BookPage() {
 
     if (data.success) {
       setAppointmentId(data.appointmentId);
-      setStep(5);
+      goToStep(5);
     } else {
       setBookingError(data.error || "Something went wrong");
     }
@@ -142,7 +161,7 @@ export default function BookPage() {
 
     if (data.success) {
       setConfirmedAppointment(data.appointment);
-      setStep(6);
+      goToStep(6);
     } else {
       setOtpError(data.error || "Invalid OTP");
     }
@@ -155,7 +174,6 @@ export default function BookPage() {
       ? patientPhone
       : "91" + patientPhone;
 
-    // Cancel old appointment and create new one
     const res = await fetch("/api/booking", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -202,9 +220,9 @@ export default function BookPage() {
             </span>
           </Link>
 
-          {canGoBack && (
+          {canGoBack ? (
             <button
-              onClick={() => setStep(step - 1)}
+              onClick={() => goToStep(step - 1)}
               className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -212,7 +230,17 @@ export default function BookPage() {
               </svg>
               Back
             </button>
-          )}
+          ) : step === 1 ? (
+            <Link
+              href="/"
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              Home
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -221,57 +249,68 @@ export default function BookPage() {
         <StepIndicator current={step} />
 
         <div className="bg-white rounded-2xl border border-border shadow-sm p-6 sm:p-8">
-          {step === 1 && (
-            <ServiceStep
-              services={services}
-              selected={selectedService}
-              onSelect={handleServiceSelect}
-            />
-          )}
+          <div
+            className={`transition-all duration-200 ${
+              animating
+                ? "opacity-0 translate-y-2"
+                : "opacity-100 translate-y-0"
+            }`}
+          >
+            {step === 1 && (
+              <ServiceStep
+                services={services}
+                selected={selectedService}
+                onSelect={handleServiceSelect}
+                onNext={() => selectedService && goToStep(2)}
+              />
+            )}
 
-          {step === 2 && (
-            <DateStep
-              selected={selectedDate}
-              onSelect={handleDateSelect}
-              blockedDates={blockedDates}
-              availableDays={availableDays}
-            />
-          )}
+            {step === 2 && (
+              <DateStep
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                onNext={() => selectedDate && goToStep(3)}
+                blockedDates={blockedDates}
+                availableDays={availableDays}
+              />
+            )}
 
-          {step === 3 && (
-            <TimeSlotStep
-              slots={slots}
-              selected={selectedTime}
-              onSelect={handleTimeSelect}
-              loading={slotsLoading}
-            />
-          )}
+            {step === 3 && (
+              <TimeSlotStep
+                slots={slots}
+                selected={selectedTime}
+                onSelect={handleTimeSelect}
+                onNext={() => selectedTime && goToStep(4)}
+                loading={slotsLoading}
+              />
+            )}
 
-          {step === 4 && (
-            <PatientDetailsStep
-              name={patientName}
-              phone={patientPhone}
-              onNameChange={setPatientName}
-              onPhoneChange={setPatientPhone}
-              onSubmit={handleBookingSubmit}
-              loading={bookingLoading}
-              error={bookingError}
-            />
-          )}
+            {step === 4 && (
+              <PatientDetailsStep
+                name={patientName}
+                phone={patientPhone}
+                onNameChange={setPatientName}
+                onPhoneChange={setPatientPhone}
+                onSubmit={handleBookingSubmit}
+                loading={bookingLoading}
+                error={bookingError}
+              />
+            )}
 
-          {step === 5 && (
-            <OTPStep
-              phone={patientPhone}
-              onVerify={handleOTPVerify}
-              onResend={handleResendOTP}
-              loading={otpLoading}
-              error={otpError}
-            />
-          )}
+            {step === 5 && (
+              <OTPStep
+                phone={patientPhone}
+                onVerify={handleOTPVerify}
+                onResend={handleResendOTP}
+                loading={otpLoading}
+                error={otpError}
+              />
+            )}
 
-          {step === 6 && confirmedAppointment && (
-            <ConfirmationStep appointment={confirmedAppointment} />
-          )}
+            {step === 6 && confirmedAppointment && (
+              <ConfirmationStep appointment={confirmedAppointment} />
+            )}
+          </div>
         </div>
       </div>
     </div>

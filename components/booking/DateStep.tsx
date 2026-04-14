@@ -6,7 +6,8 @@ import { addDays, isBefore, startOfDay } from "date-fns";
 
 interface Props {
   selected: Date | null;
-  onSelect: (date: Date) => void;
+  onSelect: (date: Date | null) => void;
+  onNext: () => void;
   blockedDates: string[];
   availableDays: number[];
 }
@@ -14,6 +15,7 @@ interface Props {
 export default function DateStep({
   selected,
   onSelect,
+  onNext,
   blockedDates,
   availableDays,
 }: Props) {
@@ -24,14 +26,15 @@ export default function DateStep({
     if (isBefore(date, today)) return true;
     if (blocked.some((b) => b.toDateString() === date.toDateString()))
       return true;
-    if (!availableDays.includes(date.getDay())) return true;
+    if (availableDays.length > 0 && !availableDays.includes(date.getDay()))
+      return true;
     return false;
   };
 
   return (
     <div>
       <h2 className="text-2xl font-bold text-foreground mb-2">Pick a Date</h2>
-      <p className="text-muted-foreground mb-8">
+      <p className="text-muted-foreground text-sm mb-8">
         Select your preferred appointment date.
       </p>
 
@@ -40,7 +43,8 @@ export default function DateStep({
           <DayPicker
             mode="single"
             selected={selected || undefined}
-            onSelect={(date) => date && onSelect(date)}
+            required={false}
+            onSelect={(day) => onSelect(day || null)}
             disabled={isDisabled}
             fromDate={today}
             toDate={addDays(today, 60)}
@@ -54,6 +58,18 @@ export default function DateStep({
           />
         </div>
       </div>
+
+      <button
+        onClick={onNext}
+        disabled={!selected}
+        className={`mt-8 w-full py-3.5 rounded-xl font-semibold text-sm tracking-wide transition-all ${
+          selected
+            ? "bg-primary text-white hover:bg-primary-dark active:scale-[0.98] shadow-md shadow-primary/20"
+            : "bg-muted text-muted-foreground border border-border cursor-not-allowed"
+        }`}
+      >
+        Next
+      </button>
     </div>
   );
 }

@@ -4,19 +4,20 @@ interface Props {
   services: Service[];
   selected: Service | null;
   onSelect: (service: Service) => void;
+  onNext: () => void;
 }
 
-export default function ServiceStep({ services, selected, onSelect }: Props) {
+export default function ServiceStep({ services, selected, onSelect, onNext }: Props) {
   return (
     <div>
       <h2 className="text-2xl font-bold text-foreground mb-2">
         Select a Service
       </h2>
-      <p className="text-muted-foreground mb-8">
+      <p className="text-muted-foreground text-sm mb-8">
         Choose the dental service you need.
       </p>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 gap-3">
         {services.map((service) => (
           <button
             key={service.id}
@@ -49,6 +50,18 @@ export default function ServiceStep({ services, selected, onSelect }: Props) {
           </button>
         ))}
       </div>
+
+      <button
+        onClick={onNext}
+        disabled={!selected}
+        className={`mt-8 w-full py-3.5 rounded-xl font-semibold text-sm tracking-wide transition-all ${
+          selected
+            ? "bg-primary text-white hover:bg-primary-dark active:scale-[0.98] shadow-md shadow-primary/20"
+            : "bg-muted text-muted-foreground border border-border cursor-not-allowed"
+        }`}
+      >
+        Next
+      </button>
     </div>
   );
 }
