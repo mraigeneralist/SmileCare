@@ -2,7 +2,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import {
   sendBookingConfirmation,
   sendDentistNotification,
-} from "@/lib/whatsapp";
+} from "@/lib/messaging";
 import { format, parse } from "date-fns";
 
 export async function POST(req: Request) {

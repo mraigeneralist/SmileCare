@@ -1,5 +1,5 @@
 import { supabaseServer } from "@/lib/supabase-server";
-import { sendOTP } from "@/lib/whatsapp";
+import { sendOTP } from "@/lib/messaging";
 
 export async function POST(req: Request) {
   const body = await req.json();

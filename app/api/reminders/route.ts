@@ -2,7 +2,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import {
   sendReminder,
   sendDentistReminder,
-} from "@/lib/whatsapp";
+} from "@/lib/messaging";
 import type { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {

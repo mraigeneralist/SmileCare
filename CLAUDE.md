@@ -12,7 +12,7 @@ Dentist appointment booking website with WhatsApp OTP verification, automated re
 - **Frontend:** React 19, Tailwind CSS v4
 - **Database:** Supabase (PostgreSQL)
 - **Auth:** Supabase Auth (email/password)
-- **WhatsApp:** Meta WhatsApp Cloud API
+- **Messaging:** WhatsApp Cloud API or Telegram Bot API (configurable via `MESSAGING_PROVIDER`)
 - **Deployment:** Vercel
 - **Language:** TypeScript (strict)
 
@@ -32,6 +32,8 @@ lib/                Shared utilities
   supabase.ts       Client-side Supabase (anon key)
   supabase-server.ts Server-side Supabase (service role key)
   whatsapp.ts       WhatsApp Cloud API helpers
+  telegram.ts       Telegram Bot API helpers
+  messaging.ts      Provider switcher (whatsapp or telegram)
   types.ts          TypeScript interfaces
 ```
 
@@ -53,6 +55,9 @@ SUPABASE_SERVICE_ROLE_KEY=
 WHATSAPP_PHONE_NUMBER_ID=
 WHATSAPP_ACCESS_TOKEN=
 DENTIST_WHATSAPP_NUMBER=
+MESSAGING_PROVIDER=          # "whatsapp" (default) or "telegram"
+TELEGRAM_BOT_TOKEN=          # Telegram Bot API token (from @BotFather)
+TELEGRAM_DENTIST_CHAT_ID=    # Telegram chat ID for dentist notifications
 CRON_SECRET=
 ```
 
