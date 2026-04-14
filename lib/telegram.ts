@@ -28,7 +28,7 @@ export async function sendOTP(phone: string, otp: string) {
   const message =
     `Your SmileCare Dental appointment verification code is: *${otp}*\n\n` +
     `This code expires in 5 minutes. Do not share it with anyone.`;
-  return sendTelegramMessage(phone, message);
+  return sendTelegramMessage(DENTIST_CHAT_ID, message);
 }
 
 export async function sendBookingConfirmation(
@@ -45,7 +45,7 @@ export async function sendBookingConfirmation(
     `You'll receive reminders before your appointment.\n\n` +
     `To cancel or reschedule, please contact us.\n` +
     `Thank you for choosing SmileCare Dental! 😊`;
-  return sendTelegramMessage(phone, message);
+  return sendTelegramMessage(DENTIST_CHAT_ID, message);
 }
 
 export async function sendDentistNotification(details: BookingDetails) {
@@ -77,7 +77,7 @@ export async function sendReminder(
     `🦷 *Service:* ${details.serviceName}\n` +
     `🕐 *Time:* ${details.appointmentTime}\n\n` +
     `We look forward to seeing you!`;
-  return sendTelegramMessage(phone, message);
+  return sendTelegramMessage(DENTIST_CHAT_ID, message);
 }
 
 export async function sendDentistReminder(
